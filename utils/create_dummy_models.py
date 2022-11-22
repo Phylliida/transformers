@@ -459,6 +459,12 @@ def convert_processors(processors, tiny_config, output_folder, result):
         result["warnings"].append(f"Failed to convert feature extractors: {e}")
         feature_extractors = []
 
+    if hasattr(tiny_config, "max_position_embeddings") and tiny_config.max_position_embeddings > 0:
+        if fast_tokenizer is not None:
+            fast_tokenizer.model_max_length = tiny_config.max_position_embeddings
+        if slow_tokenizer is not None:
+            slow_tokenizer.model_max_length = tiny_config.max_position_embeddings
+
     processors = [fast_tokenizer, slow_tokenizer] + feature_extractors
     processors = [p for p in processors if p is not None]
     for p in processors:
