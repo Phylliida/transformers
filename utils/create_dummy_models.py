@@ -461,9 +461,15 @@ def convert_processors(processors, tiny_config, output_folder, result):
 
     if hasattr(tiny_config, "max_position_embeddings") and tiny_config.max_position_embeddings > 0:
         if fast_tokenizer is not None:
-            fast_tokenizer.model_max_length = tiny_config.max_position_embeddings
+            if fast_tokenizer.__class__.__name__ in ["RobertaTokenizerFast", "XLMRobertaTokenizerFast"]:
+                fast_tokenizer.model_max_length = tiny_config.max_position_embeddings - 2
+            else:
+                fast_tokenizer.model_max_length = tiny_config.max_position_embeddings
         if slow_tokenizer is not None:
-            slow_tokenizer.model_max_length = tiny_config.max_position_embeddings
+            if slow_tokenizer.__class__.__name__ in ["RobertaTokenizer", "XLMRobertaTokenizer"]:
+                slow_tokenizer.model_max_length = tiny_config.max_position_embeddings - 2
+            else:
+                slow_tokenizer.model_max_length = tiny_config.max_position_embeddings
 
     processors = [fast_tokenizer, slow_tokenizer] + feature_extractors
     processors = [p for p in processors if p is not None]
