@@ -283,6 +283,14 @@ class PipelineTestCaseMeta(type):
             mapping = dct.get(key, {})
             if mapping:
                 for config_class, model_architectures in mapping.items():
+
+                    # config/model class we decide to skip
+                    if config_class.__name__ == "RocBertConfig":
+                        # `word_shape_file` and `word_pronunciation_file` should be shrunk during tiny model creation,
+                        # otherwise `IndexError` could occur in some embedding layers. Skip for now until this model has
+                        # more usage.
+                        continue
+
                     if not isinstance(model_architectures, tuple):
                         model_architectures = (model_architectures,)
 
