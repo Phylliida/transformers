@@ -223,6 +223,12 @@ class PipelineTestCaseMeta(type):
                 if model is None:
                     self.skipTest("model is `None`")
 
+                # TODO: Remove tiny models from the Hub which have bad tokenizers
+                if tokenizer is not None:
+                    # Avoid `IndexError` in embedding layers
+                    if len(tokenizer) > model.config.vocab_size:
+                        self.skipTest("`tokenizer` has more than `model.config.vocab_size` tokens. Something is wrong.")
+
                 if hasattr(model, "eval"):
                     model = model.eval()
 
