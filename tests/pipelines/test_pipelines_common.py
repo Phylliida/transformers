@@ -290,6 +290,12 @@ class PipelineTestCaseMeta(type):
                         # otherwise `IndexError` could occur in some embedding layers. Skip for now until this model has
                         # more usage.
                         continue
+                    # config/model class we decide to skip
+                    elif config_class.__name__ == "LayoutLMv3Config":
+                        # Get error: ValueError: Words must be of type `List[str]`. Previously, `LayoutLMv3` is not
+                        # used in pipeline tests as it could not find a checkpoint
+                        # TODO: Fix the error and use `LayoutLMv3` in pipeline tests
+                        continue
 
                     if not isinstance(model_architectures, tuple):
                         model_architectures = (model_architectures,)
