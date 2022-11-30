@@ -226,6 +226,11 @@ class PipelineTestCaseMeta(type):
                 if hasattr(model, "eval"):
                     model = model.eval()
 
+                # head-specific (within a model type) necessary changes to the config
+                # 1. for `BlenderbotForCausalLM`
+                if model_architecture.__name__ == "BlenderbotForCausalLM":
+                    model.config.encoder_no_repeat_ngram_size = 0
+
                 # TODO: candidate for config_override
                 # # XLNet actually defines it as -1.
                 # if model.config.__class__.__name__ in ROBERTA_EMBEDDING_ADJUSMENT_CONFIGS:
