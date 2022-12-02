@@ -298,7 +298,7 @@ class PipelineTestCaseMeta(type):
                         # more usage.
                         continue
                     # config/model class we decide to skip
-                    elif config_class.__name__ == "LayoutLMv3Config":
+                    elif config_class.__name__ in ["LayoutLMv3Config", "LiltConfig"]:
                         # Get error: ValueError: Words must be of type `List[str]`. Previously, `LayoutLMv3` is not
                         # used in pipeline tests as it could not find a checkpoint
                         # TODO: Fix the error and use `LayoutLMv3` in pipeline tests
