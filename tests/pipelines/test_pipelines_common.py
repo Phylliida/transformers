@@ -223,13 +223,15 @@ class PipelineTestCaseMeta(type):
                 if model is None:
                     self.skipTest("model is `None`")
 
+                CONFIG_WITHOUT_VOCAB_SIZE = ["CanineConfig"]
+
                 # TODO: Remove tiny models from the Hub which have bad tokenizers
                 if tokenizer is not None:
                     # Avoid `IndexError` in embedding layers
                     config_vocab_size = getattr(model.config, "vocab_size", None)
                     if config_vocab_size is None and hasattr(model.config, "text_config"):
                         config_vocab_size = getattr(model.config.text_config, "vocab_size", None)
-                    if config_vocab_size is None:
+                    if config_vocab_size is None and config_class.__name__ not in CONFIG_WITHOUT_VOCAB_SIZE:
                         raise ValueError("Could not determine `vocab_size` from model configuration while `tokenizer` is not `None`.")
                     if len(tokenizer) > config_vocab_size:
                         self.skipTest("`tokenizer` has more than `config_vocab_size` tokens. Something is wrong.")
