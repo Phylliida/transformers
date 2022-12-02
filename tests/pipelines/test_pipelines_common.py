@@ -231,7 +231,7 @@ class PipelineTestCaseMeta(type):
                     config_vocab_size = getattr(model.config, "vocab_size", None)
                     if config_vocab_size is None and hasattr(model.config, "text_config"):
                         config_vocab_size = getattr(model.config.text_config, "vocab_size", None)
-                    if config_vocab_size is None and config_class.__name__ not in CONFIG_WITHOUT_VOCAB_SIZE:
+                    if config_vocab_size is None and model.config.__class__.__name__ not in CONFIG_WITHOUT_VOCAB_SIZE:
                         raise ValueError("Could not determine `vocab_size` from model configuration while `tokenizer` is not `None`.")
                     if len(tokenizer) > config_vocab_size:
                         self.skipTest("`tokenizer` has more than `config_vocab_size` tokens. Something is wrong.")
