@@ -303,6 +303,12 @@ class PipelineTestCaseMeta(type):
                         # used in pipeline tests as it could not find a checkpoint
                         # TODO: Fix the error and use `LayoutLMv3` in pipeline tests
                         continue
+                    # config/model class we decide to skip
+                    elif config_class.__name__ in ["TapasConfig"]:
+                        # Get error: AssertionError: Table must be of type pd.DataFrame. Also, the tiny model has large
+                        # vocab size as the fast tokenizer could not be converted. Previous, `Tapas` is not used in
+                        # pipeline tests due to the same reason.
+                        continue
 
                     if not isinstance(model_architectures, tuple):
                         model_architectures = (model_architectures,)
