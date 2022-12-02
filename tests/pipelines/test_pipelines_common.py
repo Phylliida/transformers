@@ -226,8 +226,13 @@ class PipelineTestCaseMeta(type):
                 # TODO: Remove tiny models from the Hub which have bad tokenizers
                 if tokenizer is not None:
                     # Avoid `IndexError` in embedding layers
-                    if len(tokenizer) > model.config.vocab_size:
-                        self.skipTest("`tokenizer` has more than `model.config.vocab_size` tokens. Something is wrong.")
+                    config_vocab_size = getattr(model.config, "vocab_size", None)
+                    if config_vocab_size is None and hasattr(model.config, "text_config"):
+                        config_vocab_size = getattr(model.config.text_config, "vocab_size", None)
+                    if config_vocab_size is None:
+                        raise ValueError("Could not determine `vocab_size` from model configuration while `tokenizer` is not `None`.")
+                    if len(tokenizer) > config_vocab_size:
+                        self.skipTest("`tokenizer` has more than `config_vocab_size` tokens. Something is wrong.")
 
                 if hasattr(model, "eval"):
                     model = model.eval()
