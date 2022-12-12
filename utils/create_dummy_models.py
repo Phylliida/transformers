@@ -165,7 +165,7 @@ def get_config_class_from_processor_class(processor_class):
     return new_config_class
 
 
-def build_processor(config_class, processor_class):
+def build_processor(config_class, processor_class, allow_no_checkpoint=False):
     """Create a processor for `processor_class`.
 
     If a processor is not able to be built with the original arguments, this method tries to change the arguments and
@@ -274,6 +274,13 @@ def build_processor(config_class, processor_class):
             config_class_from_processor_class = get_config_class_from_processor_class(processor_class)
             if config_class_from_processor_class != config_class:
                 processor = build_processor(config_class_from_processor_class, processor_class)
+
+    if processor is None and allow_no_checkpoint and (issubclass(processor_class, BaseImageProcessor) or issubclass(processor_class, FeatureExtractionMixin)):
+        try:
+            processor = processor_class()
+        except Exception as e:
+            logger.error(e)
+            pass
 
     # validation
     if processor is not None:
@@ -849,7 +856,7 @@ def build(config_class, models_to_create, output_dir):
 
     for processor_class in processor_classes:
         try:
-            processor = build_processor(config_class, processor_class)
+            processor = build_processor(config_class, processor_class, allow_no_checkpoint=True)
             if processor is not None:
                 result["processor"][processor_class] = processor
         except Exception as e:
