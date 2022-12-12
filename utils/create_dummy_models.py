@@ -102,7 +102,7 @@ def get_processor_types_from_config_class(config_class, allowed_mappings=None):
         if config_class in IMAGE_PROCESSOR_MAPPING and "image_processor" in allowed_mappings:
             processor_types += _to_tuple(IMAGE_PROCESSOR_MAPPING[config_class])
         elif config_class in FEATURE_EXTRACTOR_MAPPING and "feature_extractor" in allowed_mappings:
-            processor_types = _to_tuple(FEATURE_EXTRACTOR_MAPPING[config_class])
+            processor_types += _to_tuple(FEATURE_EXTRACTOR_MAPPING[config_class])
         else:
             # Some configurations have no processor at all. For example, generic composite models like
             # `EncoderDecoderModel` is used for any (compatible) text models. Also, `DecisionTransformer` doesn't
