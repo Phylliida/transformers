@@ -32,6 +32,7 @@ from huggingface_hub import Repository, create_repo, upload_folder
 from transformers import (
     CONFIG_MAPPING,
     FEATURE_EXTRACTOR_MAPPING,
+    IMAGE_PROCESSOR_MAPPING,
     PROCESSOR_MAPPING,
     TOKENIZER_MAPPING,
     AutoTokenizer,
@@ -75,29 +76,38 @@ def get_processor_types_from_config_class(config_class, allowed_mappings=None):
 
     We use `tuple` here to include (potentially) both slow & fast tokenizers.
     """
+
+    def _to_tuple(x):
+        # make a uniform return type
+
+        if not isinstance(x, collections.abc.Sequence):
+            x = (x,)
+        else:
+            x = tuple(x)
+
+        return x
+
     if allowed_mappings is None:
-        allowed_mappings = ["processor", "tokenizer", "feature_extractor"]
+        allowed_mappings = ["processor", "tokenizer", "image_processor", "feature_extractor"]
 
     processor_types = ()
 
     # Check first if a model has `ProcessorMixin`. Otherwise, check if it has tokenizers or a feature extractor.
     if config_class in PROCESSOR_MAPPING and "processor" in allowed_mappings:
-        processor_types = PROCESSOR_MAPPING[config_class]
-    elif config_class in TOKENIZER_MAPPING and "tokenizer" in allowed_mappings:
-        processor_types = TOKENIZER_MAPPING[config_class]
-    elif config_class in FEATURE_EXTRACTOR_MAPPING and "feature_extractor" in allowed_mappings:
-        processor_types = FEATURE_EXTRACTOR_MAPPING[config_class]
+        processor_types = _to_tuple(PROCESSOR_MAPPING[config_class])
     else:
-        # Some configurations have no processor at all. For example, generic composite models like
-        # `EncoderDecoderModel` is used for any (compatible) text models. Also, `DecisionTransformer` doesn't
-        # require any processor.
-        pass
+        if config_class in TOKENIZER_MAPPING and "tokenizer" in allowed_mappings:
+            processor_types = TOKENIZER_MAPPING[config_class]
 
-    # make a uniform return type
-    if not isinstance(processor_types, collections.abc.Sequence):
-        processor_types = (processor_types,)
-    else:
-        processor_types = tuple(processor_types)
+        if config_class in IMAGE_PROCESSOR_MAPPING and "image_processor" in allowed_mappings:
+            processor_types += _to_tuple(IMAGE_PROCESSOR_MAPPING[config_class])
+        elif config_class in FEATURE_EXTRACTOR_MAPPING and "feature_extractor" in allowed_mappings:
+            processor_types = _to_tuple(FEATURE_EXTRACTOR_MAPPING[config_class])
+        else:
+            # Some configurations have no processor at all. For example, generic composite models like
+            # `EncoderDecoderModel` is used for any (compatible) text models. Also, `DecisionTransformer` doesn't
+            # require any processor.
+            pass
 
     # We might get `None` for some tokenizers - remove them here.
     processor_types = tuple(p for p in processor_types if p is not None)
